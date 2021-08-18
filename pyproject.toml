@@ -1,0 +1,25 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "biodiversitymetric3"
+authors = [{name = "Joe Marsh Rossney", email = "Joe.Marsh-Rossney@ed.ac.uk"}]
+readme = "README.md"
+classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
+dynamic = ["version", "description"]
+requires-python = ">=3.9"
+dependencies = ["jsonargparse", "fuzzywuzzy"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.scripts]
+bm3-report = "metric.report:main"
+
+[project.urls]
+Source = "https://github.com/marshrossney/biodiversitymetric3"
+Discussion = "https://marshrossney.github.io/biodiversitymetric3"
+
+[tool.flit.module]
+name = "metric"

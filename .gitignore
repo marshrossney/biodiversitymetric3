@@ -1,2 +1,3 @@
 notes.txt
 *.ipynb
+__pycache__

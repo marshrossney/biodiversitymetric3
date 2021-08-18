@@ -1,0 +1,14 @@
+baseline:
+    - parcel_id: b1
+      habitat: modified grassland
+      area: 6.72
+      condition: Poor
+      strategic_significance: Low
+      description: dog
+
+    - parcel_id: b2
+      habitat: mixed scrub
+      area: 0.04
+      condition: Moderate
+      strategic_significance: Low
+      description: cat
