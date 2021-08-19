@@ -15,7 +15,7 @@ dependencies = ["jsonargparse", "fuzzywuzzy"]
 test = ["pytest"]
 
 [project.scripts]
-bm3-report = "metric.report:main"
+report = "metric.report:main"
 
 [project.urls]
 Source = "https://github.com/marshrossney/biodiversitymetric3"

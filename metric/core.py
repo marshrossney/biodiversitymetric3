@@ -1,23 +1,26 @@
-from collections import namedtuple
-import json
+from enum import Enum
 from types import SimpleNamespace
 
 from fuzzywuzzy import process
 from jsonargparse.typing import final, PositiveInt, PositiveFloat
 
-from metric.typing import (
-    Distinctiveness,
-    Condition,
-    StrategicSignificance,
-    Difficulty,
-    SpatialRisk,
-)
+from metric import CONFIG
 
-with open("config.json", "r") as fp:
-    config = SimpleNamespace(**json.load(fp))
+# Custom types for type-checking
+# Categories that have been assigned numerical values...
+Distinctiveness = Enum("Distinctiveness", CONFIG.distinctiveness)
+Condition = Enum("Condition", CONFIG.condition)
+StrategicSignificance = Enum("StrategicSignificance", CONFIG.strategic_significance)
+Difficulty = Enum("Difficulty", CONFIG.difficulty)
+SpatialRisk = Enum("SpatialRisk", CONFIG.spatial_risk)
 
 
+# Custom exceptions
 class TargetNotPossible(Exception):
+    pass
+
+
+class AreasNotEqual(Exception):
     pass
 
 
@@ -26,10 +29,11 @@ class HabitatParcel:
     """Class representing a parcel of habitat with given coordinates or area.
 
     Args:
+        parcel_id: str
         habitat: str
-        condition: str
-        strategic_significance: str
-        area: float
+        condition: Condition
+        strategic_significance: StrategicSignificance
+        area: PositiveFloat
         description: str (optional)
     """
 
@@ -42,52 +46,27 @@ class HabitatParcel:
         area: PositiveFloat,
         description: str = "",
     ):
-        self._habitat_class, _ = process.extractOne(
-            query=habitat, choices=config.habitats.keys()
-        )
-        habitat = SimpleNamespace(**config.habitats[self._habitat_class])
-
-        self._distinctiveness = getattr(Distinctiveness, habitat.distinctiveness)
+        self._parcel_id = parcel_id
         self._condition = condition
         self._strategic_significance = strategic_significance
-        self._creation_difficulty = getattr(Difficulty, habitat.creation_difficulty)
-        self._enhancement_difficulty = getattr(
-            Difficulty, habitat.enhancement_difficulty
-        )
-        self._creation_time = habitat.creation_time[condition.name]
-        self._habitat = habitat
         self._area = area
 
-        """
-        NumberedCategory(
-            properties.distinctiveness,
-            config.distinctiveness[properties.distinctiveness],
+        # Extract closest match to valid habitat class
+        self._habitat, _ = process.extractOne(
+            query=habitat, choices=CONFIG.habitats.keys()
         )
-        self._creation_difficulty = NumberedCategory(
-            properties.creation_difficulty,
-            config.difficulty[properties.creation_difficulty],
-        )
-        self._enhancement_difficulty = NumberedCategory(
-            properties.enhancement_difficulty,
-            config.difficulty[properties.enhancement_difficulty],
-        )
-        self._condition = NumberedCategory(condition, config.condition[condition])
-        self._strategic_significance = NumberedCategory(
-            strategic_significance,
-            config.strategic_significance[strategic_significance],
-        )
-        self._creation_time = properties.creation_time[condition]
-        """
+        # Cache the habitat config for faster accessing
+        self._habitat_config = SimpleNamespace(**CONFIG.habitats[self.habitat])
 
     @property
-    def area(self) -> float:
-        """Area of this habitat parcel."""
-        return self._area
+    def parcel_id(self) -> str:
+        """Unique identifier for this habitat parcel."""
+        return self._parcel_id
 
     @property
-    def distinctiveness(self) -> Distinctiveness:
-        """Distinctiveness category and score for habitat class."""
-        return self._distinctiveness
+    def habitat(self) -> str:
+        """Class label for this habitat."""
+        return self._habitat
 
     @property
     def condition(self) -> Condition:
@@ -100,14 +79,24 @@ class HabitatParcel:
         return self._strategic_significance
 
     @property
+    def area(self) -> float:
+        """Area of this habitat parcel."""
+        return self._area
+
+    @property
+    def distinctiveness(self) -> Distinctiveness:
+        """Distinctiveness category and score for habitat class."""
+        return getattr(Distinctiveness, self._habitat_config.distinctiveness)
+
+    @property
     def creation_difficulty(self) -> Difficulty:
         """Creation difficulty category and score for habitat class."""
-        return self._creation_difficulty
+        return getattr(Difficulty, self._habitat_config.creation_difficulty)
 
     @property
     def enhancement_difficulty(self) -> Difficulty:
         """Enhancement difficulty category and score for habitat class."""
-        return self._enhancement_difficulty
+        return getattr(Difficulty, self._habitat_config.enhancement_difficulty)
 
     @property
     def creation_time(self) -> PositiveInt:
@@ -117,7 +106,8 @@ class HabitatParcel:
             TargetNotPossible: If configuration does not permit creation of this
                 habitat class in the given condition.
         """
-        if self._creation_time == "Not Possible":
+        time = self._habitat_config.creation_time[self.condition.name]
+        if time == "Not Possible":
             raise TargetNotPossible(
                 f"Configuration does not permit creation of habitat class: {self.habitat} in condition: {self.condition.name}."
             )
@@ -136,16 +126,16 @@ class HabitatParcel:
             `baseline` up to the given habitat class in the given condition.
         """
         if abs(baseline.area - self.area) > 1e-3:
-            # raise AreasNotEqual
-            pass
+            raise AreasNotEqual(
+                f"Area of baseline: {baseline.area} does not match area of enhancement: {self.area}"
+            )
 
         if baseline.distinctiveness.value < self.distinctiveness.value:
             key = f"Lower Distinctiveness Habitat - {self.condition.name}"
         else:
             key = f"{baseline.condition.name} - {self.condition.name}"
 
-        time = self._habitat_properties.enhancement_time[key]
-
+        time = self._habitat_config.enhancement_time[key]
         if time == "Not Possible":
             raise TargetNotPossible(
                 f"Configuration does not permit enhancement: {key} for habitat class: {self.habitat}."
@@ -168,7 +158,7 @@ class HabitatParcel:
         return (
             self.biodiversity_units
             * self.creation_difficulty.value
-            * pow(1 - config.depreciation / 100, self.creation_time)
+            * pow(1 - CONFIG.depreciation / 100, self.creation_time)
         )
 
     def enhancement_units(self, baseline: "HabitatParcel") -> PositiveFloat:
@@ -182,5 +172,5 @@ class HabitatParcel:
         return (
             self.biodiversity_units
             * self.enhancement_difficulty.value
-            * pow(1 - config.depreciation / 100, self.enhancement_time(baseline))
+            * pow(1 - CONFIG.depreciation / 100, self.enhancement_time(baseline))
         )
