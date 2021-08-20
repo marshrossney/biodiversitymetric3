@@ -1,12 +1,11 @@
 from enum import Enum
 from types import SimpleNamespace
-from typing import Optional
+from typing import Optional, TypedDict
 
 from fuzzywuzzy import process
-from jsonargparse import ArgumentParser, namespace_to_dict
-from jsonargparse.typing import final, PositiveInt, PositiveFloat
+from jsonargparse.typing import final, PositiveFloat
 
-from metric import CONFIG, INPUTS
+from metric import CONFIG
 
 
 Distinctiveness = Enum("Distinctiveness", CONFIG.distinctiveness)
@@ -14,6 +13,16 @@ Condition = Enum("Condition", CONFIG.condition)
 StrategicSignificance = Enum("StrategicSignificance", CONFIG.strategic_significance)
 Difficulty = Enum("Difficulty", CONFIG.difficulty)
 SpatialRisk = Enum("SpatialRisk", CONFIG.spatial_risk)
+
+
+class HabitatParcelInput(TypedDict):
+    pid: str
+    habitat: str
+    condition: Condition
+    strategic_significance: StrategicSignificance
+    area: PositiveFloat
+    description: Optional[str]
+    baseline_pid: Optional[str]
 
 
 class TargetNotPossible(Exception):
@@ -31,10 +40,11 @@ class HabitatParcel:
     Args:
         pid: str
         habitat: str
-        condition: Condition
-        strategic_significance: StrategicSignificance
+        condition: str
+        strategic_significance: str
         area: PositiveFloat
-        description: str (optional)
+        baseline_pid: Optional[str]
+        description: Optional[str]
     """
 
     def __init__(
@@ -45,6 +55,7 @@ class HabitatParcel:
         condition: Condition,
         strategic_significance: StrategicSignificance,
         area: PositiveFloat,
+        baseline_pid: Optional[str] = None,
         description: Optional[str] = None,
     ):
         self._pid = pid
@@ -52,6 +63,8 @@ class HabitatParcel:
         self._strategic_significance = strategic_significance
         self._area = area
 
+        if baseline_pid is not None:
+            self._baseline_pid = baseline_pid
         if description is not None:
             self._description = description
 
@@ -88,6 +101,12 @@ class HabitatParcel:
         return self._area
 
     @property
+    def baseline_pid(self) -> str:
+        """Unique identifier for the corresponding baseline parcel (enhancement only)."""
+        # Hopefully raising AttributeError is transparent enough when called erronesously
+        return self._baseline_pid
+
+    @property
     def distinctiveness(self) -> Distinctiveness:
         """Distinctiveness category and score for habitat class."""
         return getattr(Distinctiveness, self._habitat_config.distinctiveness)
@@ -103,7 +122,7 @@ class HabitatParcel:
         return getattr(Difficulty, self._habitat_config.enhancement_difficulty)
 
     @property
-    def creation_time(self) -> PositiveInt:
+    def creation_time(self) -> float:
         """Time (years) required to create habitat class in given condition.
 
         Raises:
@@ -115,10 +134,10 @@ class HabitatParcel:
             raise TargetNotPossible(
                 f"Configuration does not permit creation of habitat class: {self.habitat} in condition: {self.condition.name}."
             )
-        return int(time)
+        return float(time)
 
     @property
-    def biodiversity_units(self) -> PositiveFloat:
+    def biodiversity_units(self) -> float:
         """Biodiversity Units attributed to this habitat parcel, given its existence."""
         return (
             self.area
@@ -128,59 +147,15 @@ class HabitatParcel:
         )
 
     @property
-    def creation_units(self) -> PositiveFloat:
+    def creation_units(self) -> float:
         """Biodiversity Units awarded for proposed creation of this habitat parcel."""
         return (
             self.biodiversity_units
             * self.creation_difficulty.value
-            * pow(1 - CONFIG.depreciation / 100, self.creation_time)
+            * pow(1 - float(CONFIG.depreciation) / 100, self.creation_time)
         )
 
-
-@final
-class EnhancedHabitatParcel(HabitatParcel):
-    """Extension of `HabitatParcel` for 'enhancement' scenarios.
-
-    Takes an additional argument `baseline_pid` which must match the corresponding `pid`
-    for the baseline habitat parcel, which must have the same area.
-
-    Args:
-        pid: str
-        baseline_pid: str
-        habitat: str
-        condition: Condition
-        strategic_significance: StrategicSignificance
-        area: PositiveFloat
-        description: str (optional)
-    """
-        
-    def __init__(
-        self,
-        *,
-        pid: str,
-        baseline_pid: str,
-        habitat: str,
-        condition: Condition,
-        strategic_significance: StrategicSignificance,
-        area: PositiveFloat,
-        description: Optional[str] = None,
-    ):
-        super().__init__(
-            pid=pid,
-            habitat=habitat,
-            condition=condition,
-            strategic_significance=strategic_significance,
-            area=area,
-            description=description,
-        )
-        self._baseline_pid = baseline_pid
-
-    @property
-    def baseline_pid(self):
-        """Unique identifier for the corresponding baseline parcel."""
-        return self._baseline_pid
-
-    def enhancement_time(self, baseline: "HabitatParcel") -> PositiveInt:
+    def enhancement_time(self, baseline: "HabitatParcel") -> float:
         """Time (years) required to enhance a 'baseline' habitat to reach given
         habitat class and condition.
 
@@ -207,9 +182,9 @@ class EnhancedHabitatParcel(HabitatParcel):
             raise TargetNotPossible(
                 f"Configuration does not permit enhancement: {key} for habitat class: {self.habitat}."
             )
-        return int(time)
+        return float(time)
 
-    def enhancement_units(self, baseline: "HabitatParcel") -> PositiveFloat:
+    def enhancement_units(self, baseline: "HabitatParcel") -> float:
         """Biodiversity Units awarded for proposed enhancement of `baseline` habitat
         (of the same area) to reach the given habitat parcel.
 
@@ -220,40 +195,5 @@ class EnhancedHabitatParcel(HabitatParcel):
         return (
             self.biodiversity_units
             * self.enhancement_difficulty.value
-            * pow(1 - CONFIG.depreciation / 100, self.enhancement_time(baseline))
+            * pow(1 - float(CONFIG.depreciation) / 100, self.enhancement_time(baseline))
         )
-
-
-def load_scenario() -> SimpleNamespace:
-    """Instantiates `HabitatParcel`s based on provided information.
-
-    Returns namespace containing three elements
-        - baseline
-        - creation
-        - enhancement
-
-    Each element is a dict of `HabitatParcel` objects indexed by their (hopefully
-    unique) parcel id (`HabitatParcel.pid`).
-    """
-
-    parser = ArgumentParser()
-    parser.add_argument("--baseline", type=HabitatParcel, nargs="+")
-    parser.add_argument("--creation", type=HabitatParcel, nargs="+")
-    parser.add_argument("--enhancement", type=EnhancedHabitatParcel, nargs="+")
-
-    scenario = {}
-    for infile in INPUTS:
-        scenario.update(
-            {
-                k: {
-                    parcel["pid"]: EnhancedHabitatParcel(**parcel)
-                    if k == "enhancement"
-                    else HabitatParcel(**parcel)
-                    for parcel in v
-                }
-                for k, v, in namespace_to_dict(parser.parse_path(infile)).items()
-                if v is not None
-            }
-        )
-
-    return SimpleNamespace(**scenario)

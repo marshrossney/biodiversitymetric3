@@ -15,9 +15,9 @@ parser.add_argument(
     "--type",
     type=str,
     required=False,
-    choices=["baseline", "creation", "enhancement"],
+    choices=["baseline", "created", "enhanced"],
     default="baseline",
-    help="type of scenario, options: 'baseline', 'creation', 'enhancement', default: 'baseline'",
+    help="type of scenario, options: 'baseline', 'created', 'enhanced', default: 'baseline'",
 )
 parser.add_argument(
     "-o",
