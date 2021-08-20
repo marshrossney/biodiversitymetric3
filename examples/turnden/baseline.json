@@ -1,0 +1,151 @@
+{
+      "baseline": [
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 6.72,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b1"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 0.82,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b2"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 0.27,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b3"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 0.52,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b4"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 0.19,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b5"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 0.04,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b6"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 1.16,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b7"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 0.67,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b8"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 3.52,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b9"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 0.23,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b10"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 0.34,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b11"
+            },
+            {
+                  "habitat": "Grassland - Modified grassland",
+                  "area": 6.56,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b12"
+            },
+            {
+                  "habitat": "Urban - Artificial unvegetated, unsealed surface",
+                  "area": 0.21,
+                  "condition": "Other",
+                  "strategic_significance": "Low",
+                  "pid": "b13"
+            },
+            {
+                  "habitat": "Lakes - Ponds (Non- Priority Habitat)",
+                  "area": 0.02,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b14"
+            },
+            {
+                  "habitat": "Lakes - Ponds (Non- Priority Habitat)",
+                  "area": 0.03,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b15"
+            },
+            {
+                  "habitat": "Lakes - Ponds (Priority Habitat)",
+                  "area": 0.08,
+                  "condition": "Good",
+                  "strategic_significance": "Low",
+                  "pid": "b16"
+            },
+            {
+                  "habitat": "Sparsely vegetated land - Ruderal/Ephemeral",
+                  "area": 0.24,
+                  "condition": "Poor",
+                  "strategic_significance": "Low",
+                  "pid": "b17"
+            },
+            {
+                  "habitat": "Sparsely vegetated land - Ruderal/Ephemeral",
+                  "area": 0.01,
+                  "condition": "Moderate",
+                  "strategic_significance": "Low",
+                  "pid": "b18"
+            },
+            {
+                  "habitat": "Heathland and shrub - Mixed scrub",
+                  "area": 0.04,
+                  "condition": "Moderate",
+                  "strategic_significance": "Low",
+                  "pid": "b19"
+            },
+            {
+                  "habitat": "Woodland and forest - Lowland mixed deciduous woodland",
+                  "area": 1.11,
+                  "condition": "Good",
+                  "strategic_significance": "Low",
+                  "pid": "b20"
+            },
+            {
+                  "habitat": "Woodland and forest - Lowland mixed deciduous woodland",
+                  "area": 1.31,
+                  "condition": "Good",
+                  "strategic_significance": "Low",
+                  "pid": "b21"
+            }
+      ]
+}

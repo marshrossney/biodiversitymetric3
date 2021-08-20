@@ -1,0 +1,35 @@
+{
+   "distinctiveness": {
+      "Very High": 8,
+      "High": 6,
+      "Medium": 4,
+      "Low": 2,
+      "Very Low": 0
+   },
+   "condition": {
+      "Good": 3,
+      "Fairly Good": 2.5,
+      "Moderate": 2,
+      "Fairly Poor": 1.5,
+      "Poor": 1,
+      "Agriculture": 1,
+      "Other": 0
+   },
+   "strategic_significance": {
+      "High": 1.15,
+      "Medium": 1.1,
+      "Low": 1
+   },
+   "difficulty": {
+      "Very High": 0.1,
+      "High": 0.33,
+      "Medium": 0.67,
+      "Low": 1
+   },
+   "depreciation": 3.5,
+   "spatial_risk": {
+      "High": 0.5,
+      "Medium": 0.75,
+      "Low": 1
+   }
+}
