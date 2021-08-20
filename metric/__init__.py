@@ -23,9 +23,10 @@ _parser.add_argument(
 
 # path to input file (entries are later parsed individually)
 _parser.add_argument(
-    "input",
+    "inputs",
     type=str,
-    help="path to JSON or YAML configuration file specifying the baseline/proposed habitat parcels",
+    nargs="+",
+    help="path to JSON or YAML configuration file(s) specifying the habitat parcels",
 )
 
 _args = _parser.parse_args()
@@ -33,4 +34,4 @@ _args = _parser.parse_args()
 with open(_args.config, "r") as fp:
     CONFIG = SimpleNamespace(**json.load(fp))
 
-INPUT = _args.input
+INPUTS = _args.inputs
