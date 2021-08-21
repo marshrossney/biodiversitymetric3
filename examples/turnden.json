@@ -178,6 +178,7 @@
                   "pid": "c4"
             },
             {
+                  "baseline_pid": "b3",
                   "habitat": "Woodland and forest - Other woodland; broadleaved",
                   "area": 0.27,
                   "condition": "Moderate",
@@ -227,6 +228,7 @@
                   "pid": "c11"
             },
             {
+                  "baseline_pid": "b9",
                   "habitat": "Grassland - Other neutral grassland",
                   "area": 3.52,
                   "condition": "Moderate",
@@ -234,6 +236,7 @@
                   "pid": "c12"
             },
             {
+                  "baseline_pid": "b7",
                   "habitat": "Woodland and forest - Other woodland; broadleaved",
                   "area": 1.16,
                   "condition": "Moderate",
@@ -241,6 +244,7 @@
                   "pid": "c13"
             },
             {
+                  "baseline_pid": "b8",
                   "habitat": "Grassland - Other neutral grassland",
                   "area": 0.67,
                   "condition": "Moderate",

@@ -1,3 +1,4 @@
+from collections import namedtuple
 from enum import Enum
 from types import SimpleNamespace
 from typing import Optional, TypedDict
@@ -13,6 +14,7 @@ Condition = Enum("Condition", CONFIG.condition)
 StrategicSignificance = Enum("StrategicSignificance", CONFIG.strategic_significance)
 Difficulty = Enum("Difficulty", CONFIG.difficulty)
 SpatialRisk = Enum("SpatialRisk", CONFIG.spatial_risk)
+TimePenalty = namedtuple("TimePenalty", ["time", "penalty"])
 
 
 class HabitatParcelInput(TypedDict):
@@ -59,12 +61,11 @@ class HabitatParcel:
         description: Optional[str] = None,
     ):
         self._pid = pid
+        self._baseline_pid = baseline_pid  # None by default
         self._condition = condition
         self._strategic_significance = strategic_significance
         self._area = area
 
-        if baseline_pid is not None:
-            self._baseline_pid = baseline_pid
         if description is not None:
             self._description = description
 
@@ -73,7 +74,7 @@ class HabitatParcel:
             query=habitat, choices=CONFIG.habitats.keys()
         )
         # Cache the habitat config for faster accessing
-        self._habitat_config = SimpleNamespace(**CONFIG.habitats[self.habitat])
+        self._config = SimpleNamespace(**CONFIG.habitats[self.habitat])
 
     @property
     def pid(self) -> str:
@@ -102,39 +103,41 @@ class HabitatParcel:
 
     @property
     def baseline_pid(self) -> str:
-        """Unique identifier for the corresponding baseline parcel (enhancement only)."""
-        # Hopefully raising AttributeError is transparent enough when called erronesously
+        """Unique identifier for the corresponding baseline parcel."""
+        # NOTE: used as dict key -> should fail with KeyError if None
         return self._baseline_pid
 
     @property
     def distinctiveness(self) -> Distinctiveness:
         """Distinctiveness category and score for habitat class."""
-        return getattr(Distinctiveness, self._habitat_config.distinctiveness)
+        return getattr(Distinctiveness, self._config.distinctiveness)
 
     @property
     def creation_difficulty(self) -> Difficulty:
         """Creation difficulty category and score for habitat class."""
-        return getattr(Difficulty, self._habitat_config.creation_difficulty)
+        return getattr(Difficulty, self._config.creation_difficulty)
 
     @property
     def enhancement_difficulty(self) -> Difficulty:
         """Enhancement difficulty category and score for habitat class."""
-        return getattr(Difficulty, self._habitat_config.enhancement_difficulty)
+        return getattr(Difficulty, self._config.enhancement_difficulty)
 
     @property
-    def creation_time(self) -> float:
+    def creation_time(self) -> TimePenalty:
         """Time (years) required to create habitat class in given condition.
 
         Raises:
             TargetNotPossible: If configuration does not permit creation of this
                 habitat class in the given condition.
         """
-        time = self._habitat_config.creation_time[self.condition.name]
-        if time == None:
+        time = self._config.creation_time[self.condition.name]
+        if time is None:
             raise TargetNotPossible(
                 f"Configuration does not permit creation of habitat class: {self.habitat} in condition: {self.condition.name}."
             )
-        return float(time)
+        time = float(time)
+        penalty = pow(1 - float(CONFIG.depreciation) / 100, time)
+        return TimePenalty(time, penalty)
 
     @property
     def biodiversity_units(self) -> float:
@@ -152,10 +155,10 @@ class HabitatParcel:
         return (
             self.biodiversity_units
             * self.creation_difficulty.value
-            * pow(1 - float(CONFIG.depreciation) / 100, self.creation_time)
+            * self.creation_time.penalty
         )
 
-    def enhancement_time(self, baseline: "HabitatParcel") -> float:
+    def enhancement_time(self, baseline: "HabitatParcel") -> TimePenalty:
         """Time (years) required to enhance a 'baseline' habitat to reach given
         habitat class and condition.
 
@@ -177,12 +180,14 @@ class HabitatParcel:
         else:
             key = f"{baseline.condition.name} - {self.condition.name}"
 
-        time = self._habitat_config.enhancement_time[key]
+        time = self._config.enhancement_time[key]
         if time == None:
             raise TargetNotPossible(
                 f"Configuration does not permit enhancement: {key} for habitat class: {self.habitat}."
             )
-        return float(time)
+        time = float(time)
+        penalty = pow(1 - float(CONFIG.depreciation) / 100, time)
+        return TimePenalty(time, penalty)
 
     def enhancement_units(self, baseline: "HabitatParcel") -> float:
         """Biodiversity Units awarded for proposed enhancement of `baseline` habitat
@@ -195,5 +200,5 @@ class HabitatParcel:
         return (
             self.biodiversity_units
             * self.enhancement_difficulty.value
-            * pow(1 - float(CONFIG.depreciation) / 100, self.enhancement_time(baseline))
+            * self.enhancement_time(baseline).penalty
         )
