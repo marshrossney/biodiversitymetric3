@@ -1,3 +1,5 @@
 # Biodiversity Metric 3.0
 
-testing
+A [test](test.md).
+
+![hi](assets/hi.jpg)
