@@ -1,3 +1,4 @@
-notes.txt
 *.ipynb
 __pycache__
+*.md
+drafts/

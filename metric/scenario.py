@@ -1,5 +1,3 @@
-from typing import Optional
-
 import jsonargparse
 import tabulate
 
@@ -19,9 +17,9 @@ class Scenario:
 
     Args:
         baseline: list[HabitatParcelInput]
-        retained: Optional[list[str]]
-        created: Optional[list[HabitatParcelInput]]
-        enhanced: Optional[list[HabitatParcelInput]]
+        retained: list[str]
+        created: list[HabitatParcelInput]
+        enhanced: list[HabitatParcelInput]
     """
 
     tablefmt = "pretty"
@@ -31,9 +29,9 @@ class Scenario:
         self,
         baseline: list[HabitatParcelInput],
         *,
-        retained: Optional[list[str]] = [],
-        enhanced: Optional[list[HabitatParcelInput]] = [],
-        created: Optional[list[HabitatParcelInput]] = [],
+        retained: list[str] = [],
+        enhanced: list[HabitatParcelInput] = [],
+        created: list[HabitatParcelInput] = [],
     ):
         self._baseline = {p["pid"]: HabitatParcel(**p) for p in baseline}
         # NOTE: empty dicts in case of no input -> evals to BU = 0
