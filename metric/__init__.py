@@ -23,8 +23,9 @@ _parser.add_argument(
 
 # path to input file (entries are later parsed individually)
 _parser.add_argument(
-    "input",
+    "--input",
     type=str,
+    required=False,
     help="path to JSON or YAML configuration file specifying the habitat parcels",
 )
 
